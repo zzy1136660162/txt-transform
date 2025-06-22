@@ -51,13 +51,11 @@ export default defineConfigWithVueTs(
       '@typescript-eslint/no-explicit-any':   'off',
       '@typescript-eslint/no-unnecessary-type-assertion':'off',
       '@typescript-eslint/no-unused-expressions':'off',
-
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/consistent-type-imports': 'off',
       // 取消所有“期待”错误
       'no-console':                           'off',
-      '@typescript-eslint/consistent-type-imports': [
-        'error',
-        { prefer: 'type-imports' }
-      ],
+
     }
   },
   // https://github.com/vuejs/eslint-config-typescript
@@ -89,7 +87,8 @@ export default defineConfigWithVueTs(
       // Vue 相关
       'vue/no-unused-components':             'off',
       'vue/no-unused-vars':                   'off',
-
+      '@typescript-eslint/no-empty-object-type': 'off',
+      '@typescript-eslint/consistent-type-imports': 'off',
       // TypeScript/ESLint 相关
       '@typescript-eslint/no-unused-vars':    'off',
       '@typescript-eslint/no-floating-promises':'off',
