@@ -2,7 +2,7 @@
   "name": "video-search",
   "version": "0.0.1",
   "description": "A Quasar Project",
-  "productName": "Quasar App",
+  "productName": "txt-transform",
   "author": "张子扬 <1136660162@qq.com>",
   "type": "module",
   "private": true,
