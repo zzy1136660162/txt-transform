@@ -1,4 +1,4 @@
-# Quasar App (video-search)
+# Quasar App (text-transform)
 
 A Quasar Project
 
