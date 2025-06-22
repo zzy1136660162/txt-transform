@@ -5,6 +5,8 @@ import { fileURLToPath } from 'url'
 import {enable} from "@electron/remote/main/index.js";
 import fs from 'fs'
 import readline from 'readline'
+import chardet from 'chardet'
+import iconv from 'iconv-lite'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -38,21 +40,30 @@ function registerHandlers () {
     const original: Array<{ item83: string; item84: string }> = []
     const transformed: Array<{ item83: string; item84: string }> = []
 
+    let detected = chardet.detectFileSync(inputPath) || 'UTF-8'
+    detected = detected.toString().toLowerCase()
+    if (detected.includes('gb')) {
+      detected = 'gbk'
+    }
+    if (!iconv.encodingExists(detected)) {
+      detected = 'utf8'
+    }
+
     const rl = readline.createInterface({
-      input: fs.createReadStream(inputPath),
+      input: fs.createReadStream(inputPath).pipe(iconv.decodeStream(detected)),
       crlfDelay: Infinity
     })
-    const outputStream = fs.createWriteStream(outPath, { encoding: 'utf8' })
+    const outputStream = fs.createWriteStream(outPath)
 
     let count = 0
     rl.on('line', line => {
       if (!line.includes('|') || line.trim().length === 0) {
-        outputStream.write(line + '\n')
+        outputStream.write(iconv.encode(line + '\n', detected))
         return
       }
       const items = line.split('|')
       if (items.length < 84) {
-        outputStream.write(line + '\n')
+        outputStream.write(iconv.encode(line + '\n', detected))
         return
       }
       let item83 = items[82] || ''
@@ -73,7 +84,8 @@ function registerHandlers () {
         transformed.push({ item83, item84 })
       }
       count += 1
-      outputStream.write(items.join('|') + '\n')
+      const outLine = items.join('|') + '\n'
+      outputStream.write(iconv.encode(outLine, detected))
     })
 
     return new Promise(resolve => {
