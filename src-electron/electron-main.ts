@@ -1,10 +1,10 @@
 import { app,Menu, BrowserWindow, ipcMain, dialog } from 'electron';
-import path from 'path';
-import os from 'os';
-import { fileURLToPath } from 'url'
+import path from 'node:path';
+import os from 'node:os';
+import { fileURLToPath } from 'node:url'
 import {enable} from "@electron/remote/main/index.js";
-import fs from 'fs'
-import readline from 'readline'
+import fs from 'node:fs'
+import readline from 'node:readline'
 import chardet from 'chardet'
 import iconv from 'iconv-lite'
 
