@@ -22,6 +22,7 @@
 
 <script lang="ts">
 import { defineComponent, ref, computed } from 'vue'
+import { Notify } from 'quasar';
 
 export default defineComponent({
   name: 'IndexPage',
@@ -54,6 +55,7 @@ export default defineComponent({
       previewTransformed.value = result.transformed
       inputPath.value = ''
       outputDir.value = ''
+      Notify.create({ message: '转换成功', color: 'positive', timeout: 2000 });
     }
 
     return { inputPath, outputDir, chooseInput, chooseOutput, start, previewOriginal, previewTransformed, columns, canTransform }

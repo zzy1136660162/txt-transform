@@ -1,4 +1,4 @@
-import { app, BrowserWindow, ipcMain, dialog } from 'electron';
+import { app,Menu, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url'
@@ -127,7 +127,24 @@ async function createWindow() {
   mainWindow.on('closed', () => {
     mainWindow = undefined;
   });
-
+  // =========== 只保留「设置 → 退出」=============
+  const menuTemplate: Electron.MenuItemConstructorOptions[] = [
+    {
+      label: '设置',
+      submenu: [
+        {
+          label: '退出',
+          // role: 'quit' 会在不同平台自动映射到正确的快捷键
+          role: 'quit'            // macOS ⌘Q / Windows & Linux Ctrl+Q
+          // 如果想自己处理：
+          // click: () => { app.quit(); }
+        }
+      ]
+    }
+  ];
+  const menu = Menu.buildFromTemplate(menuTemplate);
+  Menu.setApplicationMenu(menu);   // ← 覆盖默认菜单
+  // ============================================
 }
 
 void app.whenReady().then(createWindow);
