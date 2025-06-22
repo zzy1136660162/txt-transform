@@ -14,8 +14,8 @@
       <q-btn color="primary" :disable="!canTransform" label="开始转换" @click="start" />
     </div>
     <div v-if="previewOriginal.length" class="q-gutter-md q-mt-lg">
-      <q-table title="原始值" :rows="previewOriginal" :columns="columns" flat dense />
-      <q-table title="转换后" :rows="previewTransformed" :columns="columns" flat dense />
+      <q-table title="原始值" :rows="previewOriginal" :columns="columns" flat dense  hide-bottom />
+      <q-table title="转换后" :rows="previewTransformed" :columns="columns" flat dense  hide-bottom />
     </div>
   </q-page>
 </template>
