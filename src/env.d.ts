@@ -9,7 +9,13 @@ declare namespace NodeJS {
 import type { OpenDialogOptions, SaveDialogOptions } from 'electron';
 
 interface MyAPI {
-  doAThing: () => void;
+  doAThing: () => void
+  selectInputFile: () => Promise<string | null>
+  selectOutputDir: () => Promise<string | null>
+  transformFile: (
+    inputPath: string,
+    outputDir: string
+  ) => Promise<{ outPath: string; original: any[]; transformed: any[] }>
 }
 
 declare global {

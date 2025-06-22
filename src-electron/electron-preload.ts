@@ -30,10 +30,14 @@
 
 
 
-import { contextBridge } from 'electron'
+import { contextBridge, ipcRenderer } from 'electron'
 
 contextBridge.exposeInMainWorld('myAPI', {
   doAThing: () => {
-    console.log(1);
-  }
+    console.log(1)
+  },
+  selectInputFile: () => ipcRenderer.invoke('select-input-file'),
+  selectOutputDir: () => ipcRenderer.invoke('select-output-dir'),
+  transformFile: (inputPath: string, outputDir: string) =>
+    ipcRenderer.invoke('transform-file', { inputPath, outputDir })
 })

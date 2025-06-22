@@ -1,8 +1,10 @@
-import { app, BrowserWindow } from 'electron';
+import { app, BrowserWindow, ipcMain, dialog } from 'electron';
 import path from 'path';
 import os from 'os';
 import { fileURLToPath } from 'url'
 import {enable} from "@electron/remote/main/index.js";
+import fs from 'fs'
+import readline from 'readline'
 
 // needed in case process is undefined under Linux
 const platform = process.platform || os.platform();
@@ -11,6 +13,77 @@ const platform = process.platform || os.platform();
 const currentDir = fileURLToPath(new URL('.', import.meta.url));
 
 let mainWindow: BrowserWindow | undefined;
+
+function registerHandlers () {
+  ipcMain.handle('select-input-file', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow!, {
+      properties: ['openFile'],
+      filters: [{ name: 'Text Files', extensions: ['txt'] }]
+    })
+    return canceled ? null : filePaths[0]
+  })
+
+  ipcMain.handle('select-output-dir', async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow!, {
+      properties: ['openDirectory']
+    })
+    return canceled ? null : filePaths[0]
+  })
+
+  ipcMain.handle('transform-file', async (_event, { inputPath, outputDir }) => {
+    const outName =
+      path.parse(inputPath).name + '_transform' + Date.now() + '.txt'
+    const outPath = path.join(outputDir, outName)
+
+    const original: Array<{ item83: string; item84: string }> = []
+    const transformed: Array<{ item83: string; item84: string }> = []
+
+    const rl = readline.createInterface({
+      input: fs.createReadStream(inputPath),
+      crlfDelay: Infinity
+    })
+    const outputStream = fs.createWriteStream(outPath, { encoding: 'utf8' })
+
+    let count = 0
+    rl.on('line', line => {
+      if (!line.includes('|') || line.trim().length === 0) {
+        outputStream.write(line + '\n')
+        return
+      }
+      const items = line.split('|')
+      if (items.length < 84) {
+        outputStream.write(line + '\n')
+        return
+      }
+      let item83 = items[82] || ''
+      let item84 = items[83] || ''
+      const len83 = item83.length
+      const len84 = item84.length
+      const orig83 = item83
+      const orig84 = item84
+      if (len83 < len84) {
+        item83 = item83 + '#'.repeat(len84 - len83)
+      } else if (len84 < len83) {
+        item84 = item84 + '#'.repeat(len83 - len84)
+      }
+      items[82] = item83
+      items[83] = item84
+      if (count < 2) {
+        original.push({ item83: orig83, item84: orig84 })
+        transformed.push({ item83, item84 })
+      }
+      count += 1
+      outputStream.write(items.join('|') + '\n')
+    })
+
+    return new Promise(resolve => {
+      rl.on('close', () => {
+        outputStream.end()
+        resolve({ outPath, original, transformed })
+      })
+    })
+  })
+}
 
 async function createWindow() {
   /**
@@ -32,6 +105,8 @@ async function createWindow() {
     },
   });
   enable(mainWindow.webContents) // <-- add this
+
+  registerHandlers()
 
   if (process.env.DEV) {
     await mainWindow.loadURL(process.env.APP_URL);

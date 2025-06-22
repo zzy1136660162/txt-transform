@@ -1,55 +1,62 @@
 <template>
-  <q-page class="row items-center justify-evenly" >
-    <example-component
-      title="Example component"
-      active
-      :todos="todos"
-      :meta="meta"
-    ></example-component>
+  <q-page class="q-pa-md">
+    <div class="q-gutter-md">
+      <q-input v-model="inputPath" label="输入文件" readonly>
+        <template #append>
+          <q-btn flat @click="chooseInput" label="选择" />
+        </template>
+      </q-input>
+      <q-input v-model="outputDir" label="输出目录" readonly>
+        <template #append>
+          <q-btn flat @click="chooseOutput" label="选择" />
+        </template>
+      </q-input>
+      <q-btn color="primary" :disable="!canTransform" label="开始转换" @click="start" />
+    </div>
+    <div v-if="previewOriginal.length" class="q-gutter-md q-mt-lg">
+      <q-table title="原始值" :rows="previewOriginal" :columns="columns" flat dense />
+      <q-table title="转换后" :rows="previewTransformed" :columns="columns" flat dense />
+    </div>
   </q-page>
 </template>
 
 <script lang="ts">
-import { defineComponent } from 'vue';
-import type { Todo, Meta } from 'components/models';
-import ExampleComponent from 'components/ExampleComponent.vue';
+import { defineComponent, ref, computed } from 'vue'
 
 export default defineComponent({
   name: 'IndexPage',
+  setup () {
+    const inputPath = ref('')
+    const outputDir = ref('')
+    const previewOriginal = ref<Array<{ item83: string; item84: string }>>([])
+    const previewTransformed = ref<Array<{ item83: string; item84: string }>>([])
 
-  components: {
-    ExampleComponent
-  },
+    const columns = [
+      { name: 'item83', label: '83', field: 'item83' },
+      { name: 'item84', label: '84', field: 'item84' }
+    ]
 
-  data () {
-    const todos: Todo[] = [
-      {
-        id: 1,
-        content: 'ct1'
-      },
-      {
-        id: 2,
-        content: 'ct2'
-      },
-      {
-        id: 3,
-        content: 'ct3'
-      },
-      {
-        id: 4,
-        content: 'ct4'
-      },
-      {
-        id: 5,
-        content: 'ct5'
-      }
-    ];
+    const canTransform = computed(() => inputPath.value && outputDir.value)
 
-    const meta: Meta = {
-      totalCount: 1200
-    };
+    async function chooseInput () {
+      const res = await window.myAPI.selectInputFile()
+      if (res) inputPath.value = res
+    }
 
-    return { todos, meta };
+    async function chooseOutput () {
+      const res = await window.myAPI.selectOutputDir()
+      if (res) outputDir.value = res
+    }
+
+    async function start () {
+      const result = await window.myAPI.transformFile(inputPath.value, outputDir.value)
+      previewOriginal.value = result.original
+      previewTransformed.value = result.transformed
+      inputPath.value = ''
+      outputDir.value = ''
+    }
+
+    return { inputPath, outputDir, chooseInput, chooseOutput, start, previewOriginal, previewTransformed, columns, canTransform }
   }
-});
+})
 </script>
