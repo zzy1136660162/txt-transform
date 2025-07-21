@@ -20,7 +20,7 @@ function registerHandlers () {
   ipcMain.handle('select-input-file', async () => {
     const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow!, {
       properties: ['openFile'],
-      filters: [{ name: 'Text Files', extensions: ['txt'] }]
+      // filters: [{ name: 'Text Files', extensions: ['txt'] }]
     })
     return canceled ? null : filePaths[0]
   })
